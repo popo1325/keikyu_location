@@ -1,21 +1,18 @@
 <?php
-// CSVファイルのパス
 $positionCsvPath = 'position.csv';
 $kindCsvPath = 'kind.csv';
 
-// APIのURL
 $trainApiUrl = 'https://app-kq.net/api/train';
 $trainTimeApiUrl = 'https://app-kq.net/api/trainTime';
 
 try {
-    // CSVファイルを読み込む
     function loadCsvToArray($csvFilePath)
     {
         if (!file_exists($csvFilePath) || !is_readable($csvFilePath)) {
             throw new Exception("$csvFilePath が見つからないか、読み取れません。");
         }
         $csvData = array_map('str_getcsv', file($csvFilePath));
-        $header = array_shift($csvData); // ヘッダー行を取得
+        $header = array_shift($csvData);
         $result = [];
         foreach ($csvData as $row) {
             $result[$row[0]] = $row; // $row[0]がキー, 全体を値として格納
@@ -23,7 +20,6 @@ try {
         return $result;
     }
 
-    // CSVデータをロード
     $positions = loadCsvToArray($positionCsvPath);
     $kinds = loadCsvToArray($kindCsvPath);
 
@@ -42,13 +38,11 @@ try {
         throw new Exception("train APIエラー: ステータスコード $trainHttpCode");
     }
 
-    // train APIのレスポンスをデコード
     $trainData = json_decode($trainResponse, true);
     if (json_last_error() !== JSON_ERROR_NONE) {
         throw new Exception('JSONデコードエラー: ' . json_last_error_msg());
     }
 
-    // trainTime APIからデータを取得
     foreach ($trainData as &$train) {
         if (!isset($train['train_no'], $train['direction'], $train['position'], $train['train_kind'])) {
             continue; // 必要なデータが揃っていない場合はスキップ
@@ -107,7 +101,6 @@ try {
         }
     }
 
-    // 結果を返す
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode($trainData);
 
